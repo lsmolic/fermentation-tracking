@@ -60,8 +60,8 @@ function formatting() {
       conditionalFormatRules = sheet.getActiveSheet().getConditionalFormatRules();
       conditionalFormatRules.push(SpreadsheetApp.newConditionalFormatRule()
         .setRanges([matchedRange])
-        .setGradientMaxpoint('yellow')
-        .setGradientMinpoint('yellow')
+        .setGradientMaxpoint('#8E7CC3')
+        .setGradientMinpoint('#8E7CC3')
         .build());
       sheet.getActiveSheet().setConditionalFormatRules(conditionalFormatRules);
     }
@@ -80,8 +80,11 @@ function formatting() {
       if (col == "°C") {
        tempRange(c)
       }
-      if (col == "B"){
+      if (col == "Acid"){
         thresholdMarker( c, 2.0)
+      }
+      if (col == "SMV"){
+        thresholdMarker( c, -20.0, true)
       }
       if (col == "Acid"){
         thresholdMarker( c, 2.0)
