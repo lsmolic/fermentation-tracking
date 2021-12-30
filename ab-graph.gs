@@ -3,34 +3,33 @@ function regenerateABGraph(){
 }
 
 function getRanges(){
-  var sheet = SpreadsheetApp
-    .openById('1SKwVYrnLY35OwbARFKnx7OTl52Q1QMyWj4_DN6yjeWA')
-    .getSheetByName('Batch Summary')
-  
- var lastColumn = sheet.getLastColumn();
- var headerValues = sheet.getRange(1,1,1,lastColumn+1).getValues()
- var batchNameColumnIndex = headerValues[0].findIndex((value) => value == 'EKOS') + 1
- var checkBoxColumnIndex = headerValues[0].findIndex((value) => value == 'A/B') + 1
- var batchColumnNameA1 = columnToLetter(batchNameColumnIndex)
- var checkBoxColumnNameA1 = columnToLetter(checkBoxColumnIndex)
-
- var rangeList = SpreadsheetApp
-    .openById('1SKwVYrnLY35OwbARFKnx7OTl52Q1QMyWj4_DN6yjeWA')
-    .getSheetByName('Batch Summary')
+  // Determine 
+  var sheet = getOverviewSheet().getSheetByName('Batch Summary')
+  var lastColumn = sheet.getLastColumn();
+  var headerValues = sheet.getRange(1,1,1,lastColumn+1).getValues()
+  var batchNameColumnIndex = headerValues[0].findIndex((value) => value == 'EKOS') + 1
+  var checkBoxColumnIndex = headerValues[0].findIndex((value) => value == 'A/B') + 1
+  var batchColumnNameA1 = columnToLetter(batchNameColumnIndex)
+  var checkBoxColumnNameA1 = columnToLetter(checkBoxColumnIndex)
+  var rangeList = sheet
     .getRangeList([batchColumnNameA1+'2:'+batchColumnNameA1, checkBoxColumnNameA1+'2:'+checkBoxColumnNameA1])
     .getRanges()
-
   var rangeValues = []
-    rangeList.forEach(function (rg){
-      rangeValues.push(rg.getValues().map(value => value[0]))
-    })
-
+  rangeList.forEach(function (rg){
+    rangeValues.push(rg.getValues().map(value => value[0]))
+  })
   var fermentationNames = rangeValues[0]
   var checkBoxes = rangeValues[1]
   var fermentationIndicies = getAllIndexes(checkBoxes, true)
   var selectedFermentationNames = fermentationIndicies.map(i => fermentationNames[i])
+  var columnsToFind = ['B', 'ABV']
+  
+  var fermentationKeyedObject = setupFermentationKeyedObject(selectedFermentationNames, columnsToFind)
+  
+  abGraph(selectedFermentationNames, fermentationKeyedObject)
+}
 
-  var formatSheetName = function(name){
+function formatSheetName(name){
     if(name.includes("WF")){
       return 'FV - Filtered'
     }else if(name.includes("WS")){
@@ -44,19 +43,34 @@ function getRanges(){
     }
   }
 
+function setupFermentationKeyedObject(selectedFermentationNames, columnsToFind){
+  /*
+  BUILDING:
+
+  {
+    WU0009  = {
+                B=12.0, ABV=16.0, sheetName=FV - Unfiltered
+              }, 
+    WF0004  = {
+                B=67.0, ABV=71.0, sheetName=FV - Filtered
+              }, 
+    WF0011  = {
+                B=11.0, ABV=15.0, sheetName=FV - Filtered
+              }, 
+    WF0008  = {  
+                B=35.0, ABV=39.0, sheetName=FV - Filtered
+              }
+  }
+  */
   var formattedSheetNames = selectedFermentationNames
     .map(name => formatSheetName(name))
     .filter(e=>e) // remove nulls
-
-  var columnsToFind = ['B', 'ABV']
-
-  var uniqueSheetNames = formattedSheetNames.filter(onlyUnique)
-  // var sheetTopRanges = uniqueSheetNames.reduce((acc,curr)=> (acc[curr]={},acc),{}); // object with sheet name keys
+  
+  
   var fermentationKeyedObject = {}
-
+  var uniqueSheetNames = formattedSheetNames.filter(onlyUnique)
   uniqueSheetNames.forEach( (name) => {
-    Logger.log(name)
-    var sheet =SpreadsheetApp.getActive().getSheetByName(name)
+    var sheet = getFermentationSheet().getSheetByName(name)
     var lastColumn = sheet.getLastColumn();
     var topRanges = sheet.getRange(1,1,2,lastColumn+1).getValues()
     // Logger.log(topRanges)
@@ -74,10 +88,7 @@ function getRanges(){
     })
   })
 
-  Logger.log(selectedFermentationNames)
-  
-  
-  selectedFermentationNames.forEach( (value, index) => {
+   selectedFermentationNames.forEach( (value, index) => {
     var rangeArray = []
     columnsToFind.forEach((column) => {
       var columnIndex = parseInt(fermentationKeyedObject[value][column])
@@ -86,13 +97,12 @@ function getRanges(){
     })
     fermentationKeyedObject[value]['ranges'] = rangeArray
   })
-  
   Logger.log(fermentationKeyedObject)
-  abGraph(selectedFermentationNames, fermentationKeyedObject)
+  return fermentationKeyedObject
 }
 
 function abGraph(selectedFermentationNames, fermentationKeyedObject){
-  var graphSheet = SpreadsheetApp.getActive().getSheetByName('A/B Graph')
+  var graphSheet = getGraphSheet().getSheetByName('A/B Graph')
   graphSheet.clearContents()
   var abvValues = Array.from({length: 21/0.1}, (_, i) => (0.0 + (i * 0.1)).toFixed(1));
   var abvColumnValues = [["ABV"], ...abvValues.map( a => [a])]
@@ -102,13 +112,10 @@ function abGraph(selectedFermentationNames, fermentationKeyedObject){
     selectedColumns.push(fermentationKeyedObject[name]['ranges'])
   })
 
-  // var selectedColumns = [['FV - Filtered!T3:T','FV - Filtered!X3:X'],['FV - Filtered!D3:D','FV - Filtered!H3:H']]
-  // make a massive array of all values
   var brewRanges = []
   selectedColumns.forEach(function(rangeListName){
-    Logger.log(rangeListName)
     var sheetName = rangeListName[0].split("!")[0]
-    var ranges = SpreadsheetApp.getActive().getSheetByName(sheetName).getRangeList(rangeListName).getRanges()
+    var ranges = getFermentationSheet().getSheetByName(sheetName).getRangeList(rangeListName).getRanges()
     var rangeValues = []
     ranges.forEach(function (rg){
       rangeValues.push(rg.getValues())
@@ -152,10 +159,8 @@ function abGraph(selectedFermentationNames, fermentationKeyedObject){
         if(columnIndex){
           data[columnIndex][index] = columnValue
           if(previousIndex && previousValue){
-            Logger.log(columnIndex+ " - " +columnValue+ " - " + previousIndex + " - " + previousValue)
             var step = parseFloat((columnValue - previousValue) / (columnIndex - previousIndex)).toFixed(2)
             var startValue = parseFloat(previousValue) + parseFloat(step)
-              Logger.log(startValue)
             for(var p = previousIndex + 1; p < columnIndex; p++){
               data[p][index] = startValue
               startValue =  (parseFloat(startValue) + parseFloat(step)).toFixed(2)
@@ -178,18 +183,9 @@ function abGraph(selectedFermentationNames, fermentationKeyedObject){
   var numberOfRows = data.length
   var lastColumnLetters = columnToLetter(numberOfColumns + 1) // add one for the starting column
   var rangeName = "B1:"+lastColumnLetters+numberOfRows
-  
-  // Logger.log("numberOfColumns: " + numberOfColumns)
-  // Logger.log("numberOfRows: " + numberOfRows)
-  // Logger.log("lastColumnLetters: " + lastColumnLetters)
-  // Logger.log("rangeName: " + rangeName)
-
   var abvRange = graphSheet.getRange("A1:A211")
-
-  // Logger.log(abvColumnValues)
   abvRange.setValues(abvColumnValues)
   var range = graphSheet.getRange(rangeName)
-  // Logger.log(range.getValues())
   range.setValues(data);
 
   var hAxisOptions = {
@@ -205,7 +201,7 @@ function abGraph(selectedFermentationNames, fermentationKeyedObject){
     .addRange(abvRange)
     .addRange(range)
     .setTransposeRowsAndColumns(false)
-    .setPosition(3, 3, 0, 0)
+    .setPosition(2, 2, 0, 0)
     .setOption('hAxis', hAxisOptions)
     .setNumHeaders(1)
     .setOption('title', 'A/B Line')

@@ -8,9 +8,6 @@
     "macros": [{
       "menuName": "formatting",
       "functionName": "formatting"
-    }, {
-      "menuName": "regenerateABGraph",
-      "functionName": "regenerateABGraph"
     }]
   }
 }
