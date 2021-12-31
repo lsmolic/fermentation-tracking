@@ -1,25 +1,40 @@
-function formatting() {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet()
+var STARTING_ROW = 3
+
+function formatAll() {
+  var spreadSheet = getFermentationSheet()
+  var allSheets = getFermentationSheet().getSheets()
+  allSheets.forEach(function(sheet){
+    var name = sheet.getSheetName()
+    spreadSheet.toast('Begin formatting: '+ name);
+    formatCurrent(sheet)
+    spreadSheet.toast('Finished formatting: '+ name);
+  })
+}
+
+function formatCurrent(currentSheet) {
+  var sheet = getFermentationSheet()
+  var activeSheet = currentSheet || sheet.getActiveSheet()
   var lastColumn = sheet.getLastColumn();
-  var range = sheet.getActiveSheet().getRange(2,1,1,lastColumn+1);
+  //TODO: dynamically determine the first column to cycle through. Shouldn't depent on 
+  var range = activeSheet.getRange(2,1,1,lastColumn+1);
   var values = range.getValues();
   var r = 1
   var c = 1
 
-  SpreadsheetApp.getActiveSheet().clearConditionalFormatRules();
+ activeSheet.clearConditionalFormatRules();
   values.forEach(function(row) {
     row.forEach(function(col) {
       if (col == "°C") {
-       tempRange(c)
+       tempRange(activeSheet, c)
       }
       if (col == "Acid"){
-        thresholdMarker( c, 2.0, '#8E7CC3')
+        thresholdMarker(activeSheet, c, 2.0, '#8E7CC3')
       }
       if (col == "SMV"){
-        thresholdMarker( c, -20.0, '#8E7CC3', true)
+        thresholdMarker(activeSheet, c, -20.0, '#8E7CC3', true)
       }
       if (col == "ABV"){
-        thresholdMarker( c, 14.5, '#8E7CC3', true)
+        thresholdMarker(activeSheet, c, 14.5, '#8E7CC3', true)
       }
       c++;
     });
@@ -27,31 +42,31 @@ function formatting() {
   });
 }
 
-var tempRange = function (columnIndex) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet()
+var tempRange = function (activeFermentationSheet, columnIndex) {
+  var sheet = getFermentationSheet()
   var columnName = columnToLetter(columnIndex)
-  var rangeName= columnName+"3"+":"+columnName
-  var range = SpreadsheetApp.getActiveSheet().getRange(rangeName)
+  var rangeName= columnName+STARTING_ROW+":"+columnName
+  var range = activeFermentationSheet.getRange(rangeName)
     sheet.getSelection().getNextDataRange(SpreadsheetApp.Direction.NEXT).activate();
-    conditionalFormatRules = sheet.getActiveSheet().getConditionalFormatRules();
+    conditionalFormatRules = activeFermentationSheet.getConditionalFormatRules();
     conditionalFormatRules.push(SpreadsheetApp.newConditionalFormatRule()
       .setRanges([range])
       .setGradientMaxpoint('#FF2400')
       .setGradientMinpoint('#FFFFFF')
       .build());
-    sheet.getActiveSheet().setConditionalFormatRules(conditionalFormatRules);
+    activeFermentationSheet.setConditionalFormatRules(conditionalFormatRules);
 };
 
-var thresholdMarker = function (columnIndex, threshold, color, ascending=false) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet()
+var thresholdMarker = function (activeFermentationSheet, columnIndex, threshold, color, ascending=false) {
+  var sheet = getFermentationSheet()
   var columnName = columnToLetter(columnIndex)
   var lastRow = sheet.getLastRow();
   
   // Iterate through rows in the column and find number that crosses threshold
 
-  var r = 3 // first row that matters
+  var r = STARTING_ROW // first row that matters
   var rangeName= columnName+r+":"+columnName+lastRow
-  var range = SpreadsheetApp.getActiveSheet().getRange(rangeName)
+  var range = activeFermentationSheet.getRange(rangeName)
   var values = range.getValues()
   var previousValue = null
   var matchedRow = null
@@ -78,18 +93,17 @@ var thresholdMarker = function (columnIndex, threshold, color, ascending=false) 
     previousValue = row
     r++
   })
-  
 
   if(matchedRow != null){
     var matchedRangeName= columnName+matchedRowIndex
-    var matchedRange = SpreadsheetApp.getActiveSheet().getRange(matchedRangeName)
+    var matchedRange = activeFermentationSheet.getRange(matchedRangeName)
     sheet.getSelection().getNextDataRange(SpreadsheetApp.Direction.NEXT).activate();
-    conditionalFormatRules = sheet.getActiveSheet().getConditionalFormatRules();
+    conditionalFormatRules = activeFermentationSheet.getConditionalFormatRules();
     conditionalFormatRules.push(SpreadsheetApp.newConditionalFormatRule()
       .setRanges([matchedRange])
       .setGradientMaxpoint(color)
       .setGradientMinpoint(color)
       .build());
-    sheet.getActiveSheet().setConditionalFormatRules(conditionalFormatRules);
+    activeFermentationSheet.setConditionalFormatRules(conditionalFormatRules);
   }
 }
