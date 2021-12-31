@@ -97,7 +97,7 @@ function setupFermentationKeyedObject(selectedFermentationNames, columnsToFind){
     })
     fermentationKeyedObject[value]['ranges'] = rangeArray
   })
-  Logger.log(fermentationKeyedObject)
+  
   return fermentationKeyedObject
 }
 
@@ -107,10 +107,12 @@ function abGraph(selectedFermentationNames, fermentationKeyedObject){
   var abvValues = Array.from({length: 21/0.1}, (_, i) => (0.0 + (i * 0.1)).toFixed(1));
   var abvColumnValues = [["ABV"], ...abvValues.map( a => [a])]
   
+  
   var selectedColumns = []
   selectedFermentationNames.forEach(name => {
     selectedColumns.push(fermentationKeyedObject[name]['ranges'])
   })
+  
 
   var brewRanges = []
   selectedColumns.forEach(function(rangeListName){
@@ -143,7 +145,9 @@ function abGraph(selectedFermentationNames, fermentationKeyedObject){
     ]
 
   */
-  brewRanges.forEach(function(brewRange, index){    
+  addStandardRanges(brewRanges, selectedFermentationNames)
+  brewRanges.forEach(function(brewRange, index){  
+    
     var numberOfColumns = brewRange[0].length
     data.map(x => x.push('')) // initialize the column
     var previousIndex = null
@@ -177,8 +181,6 @@ function abGraph(selectedFermentationNames, fermentationKeyedObject){
   })
   // add the headers array to the beginning of the top array for column headers
   data.unshift(headers)
-
-
   var numberOfColumns = data[0].length
   var numberOfRows = data.length
   var lastColumnLetters = columnToLetter(numberOfColumns + 1) // add one for the starting column
@@ -195,21 +197,35 @@ function abGraph(selectedFermentationNames, fermentationKeyedObject){
   };
 
   var charts = graphSheet.getCharts()
-  graphSheet.removeChart(charts[0])
+  if(charts.length > 0){
+    graphSheet.removeChart(charts[0])
+  }
   chart = graphSheet.newChart().setChartType(Charts.ChartType.LINE)
     .setOption("useFirstColumnAsDomain", true)
     .addRange(abvRange)
     .addRange(range)
     .setTransposeRowsAndColumns(false)
-    .setPosition(2, 2, 0, 0)
-    .setOption('hAxis', hAxisOptions)
     .setNumHeaders(1)
+    .setPosition(1, 1, 0, 0)
+    .setOption('width', 1000)
+    .setOption('height', 700)
+    .setOption('hAxis', hAxisOptions)
     .setOption('title', 'A/B Line')
     .setOption("vAxes", {0: {title: "°B"}})
     .setOption("hAxis", {title: "ABV",})
     .setOption("legend", {position: "top"})
     .build()
 
-
     graphSheet.insertChart(chart) 
 }
+
+function addStandardRanges(brewRanges, selectedFermentationNames){
+  var ranges = standardRanges();
+  Object.keys(ranges).forEach((key) => {
+    selectedFermentationNames.push(key)
+  })
+  Object.keys(ranges).forEach((key) => {
+    brewRanges.push(ranges[key])
+  })
+}
+
