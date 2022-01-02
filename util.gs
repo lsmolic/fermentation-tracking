@@ -48,3 +48,24 @@ function findIndexFromStartPosition(array, stringToMatch, startPosition) {
   var index = array.slice(startPosition).findIndex(m => m == stringToMatch);
   return index === -1 ? -1 : index + startPosition;
 }
+
+function Coordinates (range) {
+  var self = this
+  ;
+  self.x1 = range.getColumn();
+  self.y1 = range.getRow();
+  self.x2 = range.getLastColumn();
+  self.y2 = range.getLastRow();
+}
+
+function overlaps (a, b, c, d) {
+  return (a >= c && a <= d) || (b >= c && b <= d) || (c >= a && c <= b) || (d >= a && d <= b);
+}
+
+function rangeIntersect (r1, r2) {
+
+  r1 = new Coordinates (r1);
+  r2 = new Coordinates (r2);
+
+  return (overlaps(r1.x1, r1.x2, r2.x1, r2.x2) && overlaps(r1.y1, r1.y2, r2.y1, r2.y2));
+}

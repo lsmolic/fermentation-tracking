@@ -8,6 +8,18 @@
     "macros": [{
       "menuName": "formatting",
       "functionName": "formatting"
+    }, {
+      "menuName": "formatAll",
+      "functionName": "formatAll"
+    }, {
+      "menuName": "formatCurrent",
+      "functionName": "formatCurrent"
+    }, {
+      "menuName": "New Fermentation",
+      "functionName": "NewFermentation"
+    }, {
+      "menuName": "Untitled Macro",
+      "functionName": "UntitledMacro"
     }]
   }
 }
