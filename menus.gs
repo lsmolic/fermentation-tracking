@@ -2,18 +2,23 @@ function onOpen() {
   // Get the spreadsheet's user-interface object.
   var ui = SpreadsheetApp.getUi();
   
-  ui.createMenu('Wetlands')
+  
   var spreadSheet = SpreadsheetApp.getActiveSpreadsheet()
+  Logger.log(spreadSheet.getId())
   
   if(spreadSheet.getId() == OVERVIEW_SHEET_ID){
-    ui.addItem('Rebuild A/B Graph', 'RebuildABGraph')
+    ui.createMenu('Wetlands')
+      .addItem('Rebuild A/B Graph', 'RebuildABGraph')
+      .addToUi();
   }else if(spreadSheet.getId() == FERMENTATION_SHEET_ID){
-    ui.addItem('Format Current Sheet', 'FormatCurrent')
-    ui.addItem('Format All Sheets', 'FormatAll')
+    ui.createMenu('Wetlands')
+      .addItem('Format Current Sheet', 'FormatCurrent')
+      .addItem('Format All Sheets', 'FormatAll')
+      .addToUi();
   }else if(spreadSheet.getId() == GRAPH_SHEET_ID){
-     ui.addItem('Rebuild A/B Graph', 'RebuildABGraph')
+    ui.createMenu('Wetlands')
+      .addItem('Rebuild A/B Graph', 'RebuildABGraph')
+      .addToUi();
   }
-  
-  ui.addToUi();
   
 }
