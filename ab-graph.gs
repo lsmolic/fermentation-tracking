@@ -1,4 +1,4 @@
-function regenerateABGraph(){
+function RebuildABGraph(){
   getRanges()
 }
 

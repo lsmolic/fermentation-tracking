@@ -15,11 +15,11 @@
       "menuName": "formatCurrent",
       "functionName": "formatCurrent"
     }, {
-      "menuName": "New Fermentation",
-      "functionName": "NewFermentation"
-    }, {
       "menuName": "Untitled Macro",
       "functionName": "UntitledMacro"
+    }, {
+      "menuName": "RebuildABGraph",
+      "functionName": "RebuildABGraph"
     }]
   }
 }
