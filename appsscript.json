@@ -1,25 +1,10 @@
 {
-  "timeZone": "America/New_York",
+  "timeZone": "America/Chicago",
   "dependencies": {
   },
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8",
   "sheets": {
-    "macros": [{
-      "menuName": "formatting",
-      "functionName": "formatting"
-    }, {
-      "menuName": "formatAll",
-      "functionName": "formatAll"
-    }, {
-      "menuName": "formatCurrent",
-      "functionName": "formatCurrent"
-    }, {
-      "menuName": "Untitled Macro",
-      "functionName": "UntitledMacro"
-    }, {
-      "menuName": "RebuildABGraph",
-      "functionName": "RebuildABGraph"
-    }]
+    "macros": []
   }
 }
