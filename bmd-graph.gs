@@ -33,7 +33,7 @@ function getBmdRanges(){
 function bmdGraph(selectedFermentationNames, fermentationKeyedObject){
   var graphSheet = getGraphSheet().getSheetByName('BMD')
   graphSheet.clearContents()
-  var dayValues = Array.from({length: 36/1}, (_, i) => (1 + (i * 1)).toFixed(1));
+  var dayValues = Array.from({length: 43/1}, (_, i) => (1 + (i * 1)).toFixed(1));
   var dayColumnValues = [["Day"], ...dayValues.map( a => [a])]
   var selectedColumns = []
   selectedFermentationNames.forEach(name => {
@@ -47,7 +47,9 @@ function bmdGraph(selectedFermentationNames, fermentationKeyedObject){
     var rangeValues = []
     ranges.forEach(function (rg){
       rangeValues.push(rg.getValues())
+      rangeValues.push(dayValues.map( a => [a]))
     })
+    // Logger.log(rangeValues)
     brewRanges.push(rangeValues)
   })
   
@@ -80,12 +82,11 @@ function bmdGraph(selectedFermentationNames, fermentationKeyedObject){
     var previousValue = null
     for(var i = 0; i < numberOfColumns; i++){
       // every loop fillin in the spots
-      var baume = brewRange[0][i][0]
-      // Logger.log(baume)
-      if(isFloat(baume)){
+      var bmd = brewRange[0][i][0]
+      if(isFloat(bmd)){
         
-        var columnIndex = brewRange[1][i]
-        var columnValue = baume.toFixed(1)
+        var columnIndex = parseInt(brewRange[1][i])
+        var columnValue = bmd
         if(columnIndex){
           data[columnIndex][index] = columnValue
           if(previousIndex && previousValue){
@@ -105,7 +106,7 @@ function bmdGraph(selectedFermentationNames, fermentationKeyedObject){
       
     headers.push(selectedFermentationNames[index])
   })
-  Logger.log(data)
+  // Logger.log(data)
 
    // add the headers array to the beginning of the top array for column headers
   data.unshift(headers)
@@ -113,7 +114,7 @@ function bmdGraph(selectedFermentationNames, fermentationKeyedObject){
   var numberOfRows = data.length
   var lastColumnLetters = columnToLetter(numberOfColumns + 1) // add one for the starting column
   var rangeName = "B1:"+lastColumnLetters+numberOfRows
-  var dayRange = graphSheet.getRange("A1:A211")
+  var dayRange = graphSheet.getRange("A1:A44")
   dayRange.setValues(dayColumnValues)
   var range = graphSheet.getRange(rangeName)
   range.setValues(data);
@@ -130,7 +131,7 @@ function bmdGraph(selectedFermentationNames, fermentationKeyedObject){
   }
   chart = graphSheet.newChart().setChartType(Charts.ChartType.LINE)
     .setOption("useFirstColumnAsDomain", true)
-    .addRange(abvRange)
+    .addRange(dayRange)
     .addRange(range)
     .setTransposeRowsAndColumns(false)
     .setNumHeaders(1)

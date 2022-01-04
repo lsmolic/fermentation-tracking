@@ -111,7 +111,6 @@ function abGraph(selectedFermentationNames, fermentationKeyedObject){
   selectedFermentationNames.forEach(name => {
     selectedColumns.push(fermentationKeyedObject[name]['ranges'])
   })
-  
 
   var brewRanges = []
   selectedColumns.forEach(function(rangeListName){
@@ -122,9 +121,9 @@ function abGraph(selectedFermentationNames, fermentationKeyedObject){
       rangeValues.push(rg.getValues())
     })
     brewRanges.push(rangeValues)
-  })
 
-  
+  // Logger.log(rangeValues)
+  })
 
   var data = Array.from({length: abvColumnValues.length}).map(x => Array.from({length: 0}))
   var headers = []
@@ -142,7 +141,6 @@ function abGraph(selectedFermentationNames, fermentationKeyedObject){
         [[1.0],[2.0],[3.0],[4.0]]
       ]
     ]
-
   */
   addStandardSmvRanges(brewRanges, selectedFermentationNames)
   brewRanges.forEach(function(brewRange, index){  
