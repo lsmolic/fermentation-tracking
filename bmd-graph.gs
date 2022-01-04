@@ -83,14 +83,14 @@ function bmdGraph(selectedFermentationNames, fermentationKeyedObject){
     for(var i = 0; i < numberOfColumns; i++){
       // every loop fillin in the spots
       var bmd = brewRange[0][i][0]
-      if(isFloat(bmd)){
+      if(Number(bmd) === bmd){
         
         var columnIndex = parseInt(brewRange[1][i])
         var columnValue = bmd
         if(columnIndex){
           data[columnIndex][index] = columnValue
           if(previousIndex && previousValue){
-            var step = parseFloat((columnValue - previousValue) / (columnIndex - previousIndex)).toFixed(2)
+            var step = parseInt((columnValue - previousValue) / (columnIndex - previousIndex))
             var startValue = parseFloat(previousValue) + parseFloat(step)
             for(var p = previousIndex + 1; p < columnIndex; p++){
               data[p][index] = startValue
@@ -141,7 +141,7 @@ function bmdGraph(selectedFermentationNames, fermentationKeyedObject){
     .setOption('hAxis', hAxisOptions)
     .setOption('title', 'BMD Graph')
     .setOption("vAxes", {0: {title: "BMD"}})
-    .setOption("hAxis", {title: "ABV",})
+    .setOption("hAxis", {title: "Day",})
     .setOption("legend", {position: "top"})
     .build()
 
