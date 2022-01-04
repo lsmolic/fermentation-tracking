@@ -140,7 +140,7 @@ function bmdGraph(selectedFermentationNames, fermentationKeyedObject){
     .setOption('height', 700)
     .setOption('hAxis', hAxisOptions)
     .setOption('title', 'BMD Graph')
-    .setOption("vAxes", {0: {title: "°B"}})
+    .setOption("vAxes", {0: {title: "BMD"}})
     .setOption("hAxis", {title: "ABV",})
     .setOption("legend", {position: "top"})
     .build()

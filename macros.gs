@@ -1,5 +1,3 @@
-var COLUMNS = ['°C','L°','H°','Step','SMV','B','BMD','Brix','Acid','ABV','']
-
 function NewFermentation() {
   var spreadsheet = SpreadsheetApp.getActive()
   var activeSheet = spreadsheet.getActiveSheet()
