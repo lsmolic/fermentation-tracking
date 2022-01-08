@@ -29,20 +29,6 @@ function getRanges(){
   abGraph(selectedFermentationNames, fermentationKeyedObject)
 }
 
-function formatSheetName(name){
-  if(name.includes("WF")){
-    return 'FV - Filtered'
-  }else if(name.includes("WS")){
-    return 'FV - Sparkling'
-  }else if(name.includes("WU")){
-    return 'FV - Unfiltered'
-  }else if(name.includes("MT")){
-    return 'Mini Brite Tests'
-  }else{
-    return null
-  }
-}
-
 function setupFermentationKeyedObject(selectedFermentationNames, columnsToFind){
   /*
   BUILDING:

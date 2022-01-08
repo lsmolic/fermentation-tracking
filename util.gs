@@ -1,3 +1,19 @@
+function formatSheetName(name){
+  if(name.includes("WF")){
+    return 'FV - Filtered'
+  }else if(name.includes("WS")){
+    return 'FV - Sparkling'
+  }else if(name.includes("WU")){
+    return 'FV - Unfiltered'
+  }else if(name.includes("MT")){
+    return 'Mini Brite Tests'
+  }else if(name.includes("TB")){
+    return 'FV - Taproom Base'
+  }else{
+    return null
+  }
+}
+
 function columnToLetter(column)
 {
   var temp, letter = '';
