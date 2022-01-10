@@ -1,8 +1,8 @@
-function RebuildABGraph(){
-  getRanges()
+function RebuildAcidityGraph(){
+  getAcidityRanges()
 }
 
-function getRanges(){
+function getAcidityRanges(){
   // Determine 
   var sheet = getOverviewSheet().getSheetByName('Batch Summary')
   var lastColumn = sheet.getLastColumn();
@@ -22,11 +22,11 @@ function getRanges(){
   var checkBoxes = rangeValues[1]
   var fermentationIndicies = getAllIndexes(checkBoxes, true)
   var selectedFermentationNames = fermentationIndicies.map(i => fermentationNames[i])
-  var columnsToFind = ['B', 'ABV']
+  var columnsToFind = ['Acid', 'ABV']
   
   var fermentationKeyedObject = setupFermentationKeyedObject(selectedFermentationNames, columnsToFind)
   
-  abGraph(selectedFermentationNames, fermentationKeyedObject)
+  acidGraph(selectedFermentationNames, fermentationKeyedObject)
 }
 
 function setupFermentationKeyedObject(selectedFermentationNames, columnsToFind){
@@ -86,8 +86,8 @@ function setupFermentationKeyedObject(selectedFermentationNames, columnsToFind){
   return fermentationKeyedObject
 }
 
-function abGraph(selectedFermentationNames, fermentationKeyedObject){
-  var graphSheet = getGraphSheet().getSheetByName('A/B')
+function acidGraph(selectedFermentationNames, fermentationKeyedObject){
+  var graphSheet = getGraphSheet().getSheetByName('Acidity')
   graphSheet.clearContents()
   var abvValues = Array.from({length: 21/0.1}, (_, i) => (0.0 + (i * 0.1)).toFixed(1));
   var abvColumnValues = [["ABV"], ...abvValues.map( a => [a])]
@@ -128,7 +128,7 @@ function abGraph(selectedFermentationNames, fermentationKeyedObject){
       ]
     ]
   */
-  addStandardSmvRanges(brewRanges, selectedFermentationNames)
+  // addStandardSmvRanges(brewRanges, selectedFermentationNames)
   brewRanges.forEach(function(brewRange, index){  
     
     var numberOfColumns = brewRange[0].length
@@ -194,8 +194,8 @@ function abGraph(selectedFermentationNames, fermentationKeyedObject){
     .setPosition(1, 1, 0, 0)
     .setOption('width', 1000)
     .setOption('height', 700)
-    .setOption('title', 'A/B Line')
-    .setOption("vAxes", {0: {title: "°B"}})
+    .setOption('title', 'Acidity VS ABV Line')
+    .setOption("vAxes", {0: {title: "Acidity"}})
     .setOption('hAxis', hAxisOptions)
     .setOption("hAxis", {title: "ABV"})
     .setOption("legend", {position: "top"})

@@ -55,7 +55,7 @@ function dailyGraph(selectedFermentationNames, fermentationKeyedObject){
       rangeValues.push(rg.getValues())
       rangeValues.push(dayValues.map( a => [a]))
     })
-    // Logger.log(rangeValues)
+    Logger.log(rangeValues)
     brewRanges.push(rangeValues)
   })
 
