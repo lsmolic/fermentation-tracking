@@ -157,7 +157,7 @@ var tempRange = function (activeFermentationSheet, columnIndex) {
     var conditionalFormatRules = activeFermentationSheet.getConditionalFormatRules();
     conditionalFormatRules.push(SpreadsheetApp.newConditionalFormatRule()
       .setRanges([range])
-      .setGradientMaxpointWithValue('#FF2400', SpreadsheetApp.InterpolationType.NUMBER, "24")
+      .setGradientMaxpointWithValue('#FF2400', SpreadsheetApp.InterpolationType.NUMBER, "16")
       .setGradientMinpointWithValue('#FFFFFF', SpreadsheetApp.InterpolationType.NUMBER, "0")
       .build());
     activeFermentationSheet.setConditionalFormatRules(conditionalFormatRules);
