@@ -6,13 +6,13 @@ function NewFermentation() {
   
   //Create new Columns
   spreadsheet.getRange('A1').activate();
-  spreadsheet.getActiveSheet().insertColumnsAfter(spreadsheet.getActiveRange().getColumn(), 11);
+  spreadsheet.getActiveSheet().insertColumnsAfter(spreadsheet.getActiveRange().getColumn(), 12);
   
   // SELECTED THE NEWLY CREATED COLUMNS because the indicies just shifted
-  spreadsheet.getActiveRange().offset(0, 0, spreadsheet.getActiveRange().getNumRows(), 11).activate();
+  spreadsheet.getActiveRange().offset(0, 0, spreadsheet.getActiveRange().getNumRows(), 12).activate();
   
-  spreadsheet.getRange('B1:K1').activate();
-  spreadsheet.getRange('M1:V1').copyTo(spreadsheet.getActiveRange(), SpreadsheetApp.CopyPasteType.PASTE_FORMAT, false);
+  spreadsheet.getRange('B1:L1').activate();
+  spreadsheet.getRange('N1:X1').copyTo(spreadsheet.getActiveRange(), SpreadsheetApp.CopyPasteType.PASTE_FORMAT, false);
 
   // Copy and paste the standard temperature column VALUES ONLY
   spreadsheet.getRange(copyToColumnLetter(0)+'2:'+copyToColumnLetter(0)).activate();
@@ -23,30 +23,33 @@ function NewFermentation() {
   spreadsheet.getRange(copyFromColumnLetter(1)+'2:'+copyFromColumnLetter(9)).copyTo(spreadsheet.getActiveRange(), SpreadsheetApp.CopyPasteType.PASTE_NORMAL, false);
 
   // Copy and paste the separator FORMAT ONLY
-  spreadsheet.getRange(copyToColumnLetter(10)+'1:'+copyToColumnLetter(10)).activate();
-  spreadsheet.getRange(copyFromColumnLetter(10)+'1:'+copyFromColumnLetter(10)).copyTo(spreadsheet.getActiveRange(), SpreadsheetApp.CopyPasteType.PASTE_FORMAT, false);
+  spreadsheet.getRange(copyToColumnLetter(11)+'1:'+copyToColumnLetter(11)).activate();
+  spreadsheet.getRange(copyFromColumnLetter(11)+'1:'+copyFromColumnLetter(11)).copyTo(spreadsheet.getActiveRange(), SpreadsheetApp.CopyPasteType.PASTE_FORMAT, false);
 
   // Delete values from the previous fermentation
   spreadsheet.getRange('C3:F').activate();
   spreadsheet.getActiveRangeList().clear({contentsOnly: true, skipFilteredRows: true});
-  spreadsheet.getRange('I3:K').activate();
+  spreadsheet.getRange('I3:L').activate();
   spreadsheet.getActiveRangeList().clear({contentsOnly: true, skipFilteredRows: true});
 
   // Setup the headers 
-  var headersRange = spreadsheet.getRange('B2:L2')
+  var headersRange = spreadsheet.getRange('B2:M2')
   headersRange.activate();
   headersRange.setValues([COLUMNS])
 
   // make the divider black
-  // spreadsheet.getRange('L:L').setBackground('black')
+  spreadsheet.getRange('M:M').setBackground('black')
+
+  // make the precision 0 decimals
+  spreadsheet.getRange("I3:I").setNumberFormat("#");
 
   // Delete the Fermentation Name/ID so we can fill it in
-  spreadsheet.getRange('B1:K1').activate();
+  spreadsheet.getRange('B1:L1').activate();
   spreadsheet.getActiveRangeList().clear({contentsOnly: true, skipFilteredRows: true});
   
 
   activeSheet = spreadsheet.getActiveSheet()
-  let activeRange = activeSheet.getRange('A2:L2')
+  let activeRange = activeSheet.getRange('A2:M2')
   ResizeColumns(activeSheet,activeRange)
   FormatCurrent(activeSheet,activeRange)
 };
