@@ -1,7 +1,11 @@
-var DAILY_COLUMNS = ['°C','B','BMD','Brix','Acid','ABV']
+var DAILY_COLUMNS = ['BMD','°C','Step','SMV','B','BMD','Brix','Acid','ABV']
 
 function RebuildDailyGraph(){
   getDailyRanges()
+}
+
+function transposeFermentationData(){
+
 }
 
 function getDailyRanges(){
@@ -17,7 +21,6 @@ function getDailyRanges(){
     .getRangeList([batchColumnNameA1+'2:'+batchColumnNameA1, checkBoxColumnNameA1+'2:'+checkBoxColumnNameA1])
     .getRanges()
   var rangeValues = []
-
   rangeList.forEach(function (rg){
     rangeValues.push(rg.getValues().map(value => value[0]))
   })
@@ -25,10 +28,6 @@ function getDailyRanges(){
   var checkBoxes = rangeValues[1]
   var fermentationIndicies = getAllIndexes(checkBoxes, true)
   var selectedFermentationNames = fermentationIndicies.map(i => fermentationNames[i])
-  if(selectedFermentationNames.length > 1){
-    SpreadsheetApp.getActive().toast('You can only select one Daily fermentation to graph!');
-    return
-  }
   var columnsToFind = DAILY_COLUMNS
   
   var fermentationKeyedObject = setupFermentationKeyedObject(selectedFermentationNames, columnsToFind)
@@ -36,16 +35,12 @@ function getDailyRanges(){
   dailyGraph(selectedFermentationNames, fermentationKeyedObject)
 }
 
-// selectedFermentationNames ["MT0008"]
-// fermentationKeyedObject { MT0008: { "°C": (column number), ranges: ["Mini Brite Tests!M3:M", ... ]}}
+
 function dailyGraph(selectedFermentationNames, fermentationKeyedObject){
   var graphSheet = getGraphSheet().getSheetByName('Daily')
   graphSheet.clearContents()
   var dayValues = Array.from({length: 43/1}, (_, i) => (1 + (i * 1)).toFixed(1));
   var dayColumnValues = [["Day"], ...dayValues.map( a => [a])]
-
-  // represents the A1 names of Fermentation columns we want to graph
-  // [["Mini Brite Tests!M3:M", "Mini Brite Tests!P3:P", ...], ["Mini Brite Tests!AD3:AD", "Mini Brite Tests!AF3:AF", ...]]
   var selectedColumns = []
   selectedFermentationNames.forEach(name => {
     selectedColumns.push(fermentationKeyedObject[name]['ranges'])
@@ -56,10 +51,11 @@ function dailyGraph(selectedFermentationNames, fermentationKeyedObject){
     var sheetName = rangeListName[0].split("!")[0]
     var ranges = getFermentationSheet().getSheetByName(sheetName).getRangeList(rangeListName).getRanges()
     var rangeValues = []
-    rangeValues.push(dayValues.map( a => [a]))
     ranges.forEach(function (rg){
       rangeValues.push(rg.getValues())
+      rangeValues.push(dayValues.map( a => [a]))
     })
+    Logger.log(rangeValues)
     brewRanges.push(rangeValues)
   })
 
@@ -68,15 +64,7 @@ function dailyGraph(selectedFermentationNames, fermentationKeyedObject){
   // then transpose that array and add it as the first rows in the Sheet
   
   var data = Array.from({length: dayColumnValues.length}).map(x => Array.from({length: 0}))
-  var lastDayRow = startingRow+numberOfRows - 2
-  var numberOfColumns = data[0].length
-  var numberOfRows = data.length
-  
-  var startingRow = DAILY_COLUMNS.length + 2
-  var lastDayRow = startingRow+numberOfRows - 2
-  var dayRangeName = "A"+startingRow+":A"+parseInt(lastDayRow+1)
-  var dayRange = graphSheet.getRange(dayRangeName)
-  dayRange.setValues(dayColumnValues)
+  var headers = []
 
   /* Iterate over the columns combos provided 
     [
@@ -84,147 +72,90 @@ function dailyGraph(selectedFermentationNames, fermentationKeyedObject){
       [   
         [[0.0],[0.1],[0.2],[0.3]],  
         [[1.0],[2.0],[3.0],[4.0]]    
+      ],
+      // brewRange 1
+      [ 
+        [[0.0],[0.1],[0.2],[0.3]],  
+        [[1.0],[2.0],[3.0],[4.0]]
       ]
     ]
 
   */
 
-  var rangesToAdd = []
-
-  var brewRange = brewRanges[0]
-  // clear the data for each new brewrange
-  var numberOfColumns = brewRange.length
-  // iterate over °B, SMV, etc
-  for(var c = 1; c < numberOfColumns; c++){
+  
+  // addStandardDayRanges(brewRanges, selectedFermentationNames)
+  
+  brewRanges.forEach(function(brewRange, index){  
+    
+    var numberOfColumns = brewRange[0].length
+    data.map(x => x.push('')) // initialize the column
     var previousIndex = null
     var previousValue = null
-    data = Array.from({length: numberOfRows.length}).map(x => Array.from({length: 0}))
-    // var numberOfRows = brewRange[c].length
-    // Iterate over the values in the column with are themselves Arrays with one value 
-    for(var r=0; r < numberOfRows-1; r++){
+    for(var i = 0; i < numberOfColumns; i++){
       // every loop fillin in the spots
-      var value = brewRange[c][r][0]
-      if(Number(value) == value){
-        var columnValue = value
-        if(value){
-          data[r] = [value]
+      var bmd = brewRange[0][i][0]
+      if(isFloat(bmd)){
+        var columnIndex = parseInt(brewRange[1][i])
+        var columnValue = bmd
+        if(columnIndex){
+          data[columnIndex][index] = columnValue
           if(previousIndex && previousValue){
-            var step = parseFloat((columnValue - previousValue) / (r - previousIndex))
+            var step = parseFloat((columnValue - previousValue) / (columnIndex - previousIndex)).toFixed(2)
             var startValue = parseFloat(previousValue) + parseFloat(step)
-            for(var p = previousIndex + 1; p < r; p++){
-              data[p] = [startValue]
-              startValue = (parseFloat(startValue) + parseFloat(step)).toFixed(2)
+            for(var p = previousIndex + 1; p < columnIndex; p++){
+              data[p][index] = startValue
+              startValue =  (parseFloat(startValue) + parseFloat(step)).toFixed(2)
             }
           }
-          previousIndex = r
-          previousValue = value
-        }else{
-          data[r] = ['']
+          previousIndex = columnIndex
+          previousValue = columnValue
+
         }
       }
     }
-    var completeData = data.slice()
-    completeData.unshift([DAILY_COLUMNS[c-1]])
-    var rangeName = columnToLetter(c+1)+startingRow+":"+columnToLetter(c+1)+parseInt(completeData.length+startingRow-1)
-    rangesToAdd.push([rangeName, completeData])
-  }
-    
-  rangesToAdd.forEach( rangeToAdd=> {
-    var rangeName = rangeToAdd[0]
-    Logger.log(rangeName)
-    var range = graphSheet.getRange(rangeName)
-    range.setValues(rangeToAdd[1])
+      
+    headers.push(selectedFermentationNames[index])
   })
 
-//////////////////////////////////
-// TRANSPOSE VALUES TO TOP OF SHEET 
-  var transposedDayValues = col2row(dayColumnValues)
-  var transposedDayRangeName = "A1:"+columnToLetter(lastDayRow-(DAILY_COLUMNS.length))+"1"
-  var transposedDayRange = graphSheet.getRange(transposedDayRangeName)
-  transposedDayRange.setValues(transposedDayValues)
+   // add the headers array to the beginning of the top array for column headers
+  data.unshift(headers)
+  Logger.log(data)
+  var numberOfColumns = data[0].length
+  var numberOfRows = data.length
+  var lastColumnLetters = columnToLetter(numberOfColumns + 1) // add one for the starting column
+  var startingRow = DAILY_COLUMNS.length + 2
+  var lastDayRow = startingRow+numberOfRows - 2
+  var rangeName = "B"+startingRow+":"+lastColumnLetters+parseInt(lastDayRow+1)
+  var dayRangeName = "A"+startingRow+":A"+lastDayRow
+  var dayRange = graphSheet.getRange(dayRangeName)
+  dayRange.setValues(dayColumnValues)
+  
+  var range = graphSheet.getRange(rangeName)
+  range.setValues(data);
 
-  var selectedFermentationName = selectedFermentationNames[0]
-  for(i=0; i<DAILY_COLUMNS.length; i++){
-    var dailyColumnRangeName = fermentationKeyedObject[selectedFermentationName]['ranges'][i]
-    var values = getFermentationSheet().getRange(dailyColumnRangeName).getValues()
-    values.unshift([DAILY_COLUMNS[i]])
-    var transposedDayValues = col2row(values)
-    var row = i+2
-    var transposedDayRangeName = "A"+row+":"+columnToLetter(lastDayRow-(DAILY_COLUMNS.length))+row
-    Logger.log(transposedDayRangeName)
-    var transposedDayRange = graphSheet.getRange(transposedDayRangeName)
-    transposedDayRange.setValues(transposedDayValues)
-  }
-  // END OF TRANSPOSING
-  ///////////////////////
-
+  var hAxisOptions = {
+    gridlines: {
+      count: 12
+    }
+  };
 
   var charts = graphSheet.getCharts()
   if(charts.length > 0){
     graphSheet.removeChart(charts[0])
   }
-
   chart = graphSheet.newChart().setChartType(Charts.ChartType.LINE)
     .setOption("useFirstColumnAsDomain", true)
     .addRange(dayRange)
-    .addRange(graphSheet.getRange(rangesToAdd[1][0]))
-    .addRange(graphSheet.getRange(rangesToAdd[3][0]))
-    .addRange(graphSheet.getRange(rangesToAdd[4][0]))
-    .addRange(graphSheet.getRange(rangesToAdd[5][0]))
-    .addRange(graphSheet.getRange(rangesToAdd[2][0]))
+    .addRange(range)
     .setTransposeRowsAndColumns(false)
     .setNumHeaders(1)
     .setPosition(DAILY_COLUMNS.length+2, 1, 0, 0)
     .setOption('width', 1000)
     .setOption('height', 700)
-    .setOption('hAxis', { 
-        gridlines: {
-          count: 40
-      },
-      minValue: 0,
-      maxValue: 40
-    })
+    .setOption('hAxis', hAxisOptions)
     .setOption('title', 'BMD Graph')
-    .setOption('series', {
-      1: {
-        targetAxisIndex:0
-      },
-      2: {
-        targetAxisIndex:0
-      },
-      3: {
-        targetAxisIndex:0
-      },
-      4: {
-        targetAxisIndex:1
-      },
-      5: {
-        targetAxisIndex:0
-      }
-    })
-    .setOption("vAxes",{
-        0:{
-            title: "B°, Brix, Acidity, ABV",
-            gridlines: {
-              count: 9
-            },
-            
-            minValue: 0,
-            maxValue: 20
-          },
-        1:{
-            title: "BMD",
-            gridlines: {
-                count: 10
-            },
-            minValue: 0,
-            maxValue: 100
-          }
-        } 
-      )
-    .setOption("hAxis", {
-      title: "Brew Day",
-    })
+    .setOption("vAxes", {0: {title: "BMD"}})
+    .setOption("hAxis", {title: "Brew Day",})
     .setOption("legend", {position: "top"})
     .build()
 

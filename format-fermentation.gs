@@ -2,7 +2,7 @@ var STARTING_ROW = 3
 
 function test(){
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Mini Brite Tests')
-// Logger.log(sheet.getSheetName())
+Logger.log(sheet.getSheetName())
    var range = sheet.getRange('AA8')
    cellMatchMarker(sheet, 27, 'P', '#FF2400')
 }
@@ -13,7 +13,7 @@ function ResizeColumns(sheet, customRange){
   var range = customRange || activeSheet.getRange(2,1,1,lastColumn);
   var values = range.getValues();
   var c = 1
-// Logger.log(activeSheet.getSheetName())
+Logger.log(activeSheet.getSheetName())
   values.forEach(function(row) {
     row.forEach(function(col) {
       if(['°C','L°','H°'].indexOf(col) > -1){
@@ -24,9 +24,6 @@ function ResizeColumns(sheet, customRange){
       }
       if(['B'].indexOf(col) > -1){
         activeSheet.setColumnWidth(c, 28);
-      }
-      if(['Glu'].indexOf(col) > -1){
-        activeSheet.setColumnWidth(c, 34);
       }
       if(col == ''){
         activeSheet.setColumnWidth(c, 17);
@@ -141,12 +138,8 @@ function FormatCurrent(currentSheet, customRange) {
         cellGreaterThanMarker(activeSheet, c, 14.5, '#8E7CC3')
       }
       if (col == "Step"){
-        cellMatchMarker(activeSheet, c, "PRS", '#b7e1cd')
-        cellMatchMarker(activeSheet, c, "ST", '#e3afca')
-        cellMatchMarker(activeSheet, c, "BT", '#508fbf')
-        cellMatchMarker(activeSheet, c, "PA", '#f2ed8a')
-        cellMatchMarker(activeSheet, c, "PKG", '#da97e5')
-
+        cellMatchMarker(activeSheet, c, "PS", '#b7e1cd')
+        cellMatchMarker(activeSheet, c, "PA", '#da97e5')
       }
       c++;
     });
