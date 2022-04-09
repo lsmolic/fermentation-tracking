@@ -5,6 +5,9 @@
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8",
   "sheets": {
-    "macros": []
+    "macros": [{
+      "menuName": "NewFermentation",
+      "functionName": "NewFermentation"
+    }]
   }
 }

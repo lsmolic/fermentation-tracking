@@ -1,4 +1,4 @@
-var COLUMNS = ['°C','L°','H°','Step','SMV','B','BMD','Brix','Acid','ABV','']
+var COLUMNS = ['°C','L°','H°','Step','SMV','B','BMD','Glu','Brix','Acid','ABV','']
 
 function standardSmvRanges(){
   return {
