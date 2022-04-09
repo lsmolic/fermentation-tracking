@@ -185,6 +185,12 @@ function abGraph(selectedFermentationNames, fermentationKeyedObject){
   if(charts.length > 0){
     graphSheet.removeChart(charts[0])
   }
+
+  let trendlinesOptions = {}
+  for(var i=0; i<brewRanges.length; i++){
+    trendlinesOptions[i] = {type: 'linear',}
+  }
+  
   chart = graphSheet.newChart().setChartType(Charts.ChartType.LINE)
     .setOption("useFirstColumnAsDomain", true)
     .addRange(abvRange)
@@ -199,6 +205,7 @@ function abGraph(selectedFermentationNames, fermentationKeyedObject){
     .setOption('hAxis', hAxisOptions)
     .setOption("hAxis", {title: "ABV"})
     .setOption("legend", {position: "top"})
+    .setOption("trendlines", trendlinesOptions)
     .build()
 
     graphSheet.insertChart(chart) 

@@ -10,6 +10,8 @@ function onOpen() {
     ui.createMenu('Wetlands')
       .addItem('Rebuild A/B Graph', 'RebuildABGraph')
       .addItem('Rebuild BMD Graph', 'RebuildBMDGraph')
+      .addItem('Rebuild Acidity Graph', 'RebuildAcidityGraph')
+      .addItem('Rebuild Daily Graph', 'RebuildDailyGraph')
       .addToUi();
   }else if(spreadSheet.getId() == FERMENTATION_SHEET_ID){
     ui.createMenu('Wetlands')
